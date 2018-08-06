@@ -24,9 +24,14 @@ class webServerHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 output += "<html><body>"
-                #Add resturaunt names to the output
+                #Objective 1 - Add resturaunt names to the output
                 for restaurant in restaurants:
                     output += restaurant.name
+                    output += "</br>"
+                    #Objective 2 add - delete and edit links
+                    output += "<a href ='#' >Edit </a> " 
+                    output += "</br>"
+                    output += "<a href =' #'> Delete </a>"                 
                     output += "</br></br></br>"
 
                 output += "</body></html>"
