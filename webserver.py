@@ -24,6 +24,7 @@ class webServerHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 output += "<html><body>"
+                #Add resturaunt names to the output
                 for restaurant in restaurants:
                     output += restaurant.name
                     output += "</br></br></br>"
