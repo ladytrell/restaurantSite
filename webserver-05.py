@@ -30,6 +30,7 @@ class webServerHandler(BaseHTTPRequestHandler):
                 output += "<input type='submit' value='Create'>"
 
             if self.path.endswith("/menu"):
+                courses = ["Appetizer", "Entree", "Beverage", "Dessert"]
                 restaurantIDPath = self.path.split("/")[2]
                 myRestaurantQuery = session.query(Restaurant).filter_by(
                     id=restaurantIDPath).one()
@@ -42,18 +43,23 @@ class webServerHandler(BaseHTTPRequestHandler):
                 output += "<h1>"
                 output += myRestaurantQuery.name
                 output += "</h1>"
-                for item in myMenuQuery:
-                    print (item.name)
-                    output += item.name
-                    output += "</br>"
-                    output += "Description:  %s" % item.description
-                    output += "</br>"
-                    output += "Price:  %s" % item.price
-                    output += "</br>"
-                    output += "Course:  %s" % item.course
-                    output += "</br></br></br>"
-                output += "</body></html>"
+					
+                for course in courses:
+                    myMenuQuery = session.query(MenuItem).filter(MenuItem.course == course).filter_by(
+                        restaurant = myRestaurantQuery).all()
+                    output += "<h3>"
+                    output += "%ss" % course 
+                    output += "</h3>"					
+                    for item in myMenuQuery:
+                        print (item.name)
+                        output += item.name
+                        output += "</br>"
+                        output += "Description:  %s" % item.description
+                        output += "</br>"
+                        output += "Price:  %s" % item.price
+                        output += "</br></br>"
 
+                output += "</body></html>"
                 byte = output.encode('utf-8')
                 self.wfile.write(byte)
 					
