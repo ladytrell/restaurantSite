@@ -28,11 +28,35 @@ class webServerHandler(BaseHTTPRequestHandler):
                 output += "<form method = 'POST' enctype='multipart/form-data' action = '/restaurants/new'>"
                 output += "<input name = 'newRestaurantName' type = 'text' placeholder = 'New Restaurant Name' > "
                 output += "<input type='submit' value='Create'>"
-                output += "</form></html></body>"
+
+            if self.path.endswith("/menu"):
+                restaurantIDPath = self.path.split("/")[2]
+                myRestaurantQuery = session.query(Restaurant).filter_by(
+                    id=restaurantIDPath).one()
+                myMenuQuery = session.query(MenuItem).filter_by(
+                    restaurant = myRestaurantQuery).all()
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                output = "<html><body>"
+                output += "<h1>"
+                output += myRestaurantQuery.name
+                output += "</h1>"
+                for item in myMenuQuery:
+                    print (item.name)
+                    output += item.name
+                    output += "</br>"
+                    output += "Description:  %s" % item.description
+                    output += "</br>"
+                    output += "Price:  %s" % item.price
+                    output += "</br>"
+                    output += "Course:  %s" % item.course
+                    output += "</br></br></br>"
+                output += "</body></html>"
+
                 byte = output.encode('utf-8')
                 self.wfile.write(byte)
-                # self.wfile.write(output)
-                return
+					
             if self.path.endswith("/edit"):
                 restaurantIDPath = self.path.split("/")[2]
                 myRestaurantQuery = session.query(Restaurant).filter_by(
@@ -88,12 +112,12 @@ class webServerHandler(BaseHTTPRequestHandler):
                     print (restaurant.name)
                     output += restaurant.name
                     output += "</br>"
+                    # Objective -- Add Menu Link
+                    output += "<a href ='/restaurants/%s/menu' >Menu </a> " % restaurant.id
+                    output += "</br>"
                     # Objective 2 -- Add Edit and Delete Links
-                    # Objective 4 -- Replace Edit href
-
                     output += "<a href ='/restaurants/%s/edit' >Edit </a> " % restaurant.id
                     output += "</br>"
-                    # Objective 5 -- Replace Delete href
                     output += "<a href ='/restaurants/%s/delete'> Delete </a>" % restaurant.id
                     output += "</br></br></br>"
 
