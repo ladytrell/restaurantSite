@@ -27,6 +27,10 @@ class webServerHandler(BaseHTTPRequestHandler):
                 output += "<h1>Make a New Restaurant</h1>"
                 output += "<form method = 'POST' enctype='multipart/form-data' action = '/restaurants/new'>"
                 output += "<input name = 'newRestaurantName' type = 'text' placeholder = 'New Restaurant Name' > "
+
+                output += "</body></html>"
+                byte = output.encode('utf-8')
+                self.wfile.write(byte)
                 output += "<input type='submit' value='Create'>"
 
             if self.path.endswith("/menu"):
@@ -51,7 +55,6 @@ class webServerHandler(BaseHTTPRequestHandler):
                     output += "%ss" % course 
                     output += "</h3>"					
                     for item in myMenuQuery:
-                        print (item.name)
                         output += item.name
                         output += "</br>"
                         output += "Description:  %s" % item.description
@@ -143,6 +146,11 @@ class webServerHandler(BaseHTTPRequestHandler):
                 myRestaurantQuery = session.query(Restaurant).filter_by(
                     id=restaurantIDPath).one()
                 if myRestaurantQuery:
+                    myMenuQuery = session.query(MenuItem).filter_by(
+                        restaurant = myRestaurantQuery).all()					
+                    if myMenuQuery:			
+                        for item in myMenuQuery:
+                            session.delete(item)
                     session.delete(myRestaurantQuery)
                     session.commit()
                     self.send_response(301)
