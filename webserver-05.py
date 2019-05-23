@@ -17,7 +17,7 @@ class webServerHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
-            # Objective 3 Step 2 - Create /restaurants/new page
+            # Create /restaurants/new page
             if self.path.endswith("/restaurants/new"):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -33,6 +33,7 @@ class webServerHandler(BaseHTTPRequestHandler):
                 self.wfile.write(byte)
                 output += "<input type='submit' value='Create'>"
 
+			# Display Restaurant Menu by Course
             if self.path.endswith("/menu"):
                 courses = ["Appetizer", "Entree", "Beverage", "Dessert"]
                 restaurantIDPath = self.path.split("/")[2]
@@ -51,22 +52,25 @@ class webServerHandler(BaseHTTPRequestHandler):
                 for course in courses:
                     myMenuQuery = session.query(MenuItem).filter(MenuItem.course == course).filter_by(
                         restaurant = myRestaurantQuery).all()
-                    output += "<h3>"
-                    output += "%ss" % course 
-                    output += "</h3>"					
-                    for item in myMenuQuery:
-                        output += item.name
-                        output += "</br>"
-                        output += "Description:  %s" % item.description
-                        output += "</br>"
-                        output += "Price:  %s" % item.price
-                        output += "</br></br>"
+                    if myMenuQuery:
+                        output += "<h3>"
+                        output += "%ss" % course 
+                        output += "</h3>"
+                        for item in myMenuQuery:
+                            output += item.name
+                            output += "</br>"
+                            output += "Description:  %s" % item.description
+                            output += "</br>"
+                            output += "Price:  %s" % item.price
+                            output += "</br></br>"
 
                 output += "</body></html>"
                 byte = output.encode('utf-8')
                 self.wfile.write(byte)
-					
+
+			# Display Edit Restaurant name Page
             if self.path.endswith("/edit"):
+				# Split path into a pair and assign the 3rd string value
                 restaurantIDPath = self.path.split("/")[2]
                 myRestaurantQuery = session.query(Restaurant).filter_by(
                     id=restaurantIDPath).one()
@@ -86,7 +90,8 @@ class webServerHandler(BaseHTTPRequestHandler):
 
                     byte = output.encode('utf-8')
                     self.wfile.write(byte)
-                    # self.wfile.write(output)
+
+			# Display Delete Restaurant Page
             if self.path.endswith("/delete"):
                 restaurantIDPath = self.path.split("/")[2]
  
@@ -105,12 +110,11 @@ class webServerHandler(BaseHTTPRequestHandler):
                     output += "</body></html>"
                     byte = output.encode('utf-8')
                     self.wfile.write(byte)
-                    # self.wfile.write(output)
 
+			# Display Restaurants in the the database
             if self.path.endswith("/restaurants"):
                 restaurants = session.query(Restaurant).all()
                 output = ""
-                # Objective 3 Step 1 - Create a Link to create a new menu item
                 output += "<a href = '/restaurants/new' > Make a New Restaurant Here </a></br></br>"
 
                 self.send_response(200)
@@ -121,10 +125,10 @@ class webServerHandler(BaseHTTPRequestHandler):
                     print (restaurant.name)
                     output += restaurant.name
                     output += "</br>"
-                    # Objective -- Add Menu Link
+                    #  Menu Link
                     output += "<a href ='/restaurants/%s/menu' >Menu </a> " % restaurant.id
                     output += "</br>"
-                    # Objective 2 -- Add Edit and Delete Links
+                    # Edit and Delete Links
                     output += "<a href ='/restaurants/%s/edit' >Edit </a> " % restaurant.id
                     output += "</br>"
                     output += "<a href ='/restaurants/%s/delete'> Delete </a>" % restaurant.id
@@ -133,18 +137,18 @@ class webServerHandler(BaseHTTPRequestHandler):
                 output += "</body></html>"
                 byte = output.encode('utf-8')
                 self.wfile.write(byte)
-                # self.wfile.write(output)
                 return
         except IOError:
             self.send_error(404, 'File Not Found: %s' % self.path)
 
-    # Objective 3 Step 3- Make POST method
+    # POST method
     def do_POST(self):
         try:
             if self.path.endswith("/delete"):
                 restaurantIDPath = self.path.split("/")[2]
                 myRestaurantQuery = session.query(Restaurant).filter_by(
                     id=restaurantIDPath).one()
+				# Delete Restaurant and it's menu items from the database
                 if myRestaurantQuery:
                     myMenuQuery = session.query(MenuItem).filter_by(
                         restaurant = myRestaurantQuery).all()					
@@ -168,6 +172,7 @@ class webServerHandler(BaseHTTPRequestHandler):
 
                     myRestaurantQuery = session.query(Restaurant).filter_by(
                         id=restaurantIDPath).one()
+					# Edit name
                     if myRestaurantQuery != []:
                         myRestaurantQuery.name = messagecontent[0]
                         session.add(myRestaurantQuery)
@@ -197,7 +202,7 @@ class webServerHandler(BaseHTTPRequestHandler):
         except:
             pass
 
-
+# Start Web Server
 def main():
     try:
         server = HTTPServer(('', 8080), webServerHandler)
